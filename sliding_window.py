@@ -48,6 +48,8 @@ if __name__ == '__main__':
     window_size = 4000
     num_vals = 1000000
     vals = np.random.random((num_vals,1))
-    print("Vals[:10] is {}".format(vals[:10]))
-    sliding_window( vals, window_size ) 
+    print("Vals[:10] is {}\n".format(vals[:10]))
+    sliding_window( vals, window_size )
+    print("\n")
     sliding_window_alt( vals, window_size ) 
+    print("\n")
