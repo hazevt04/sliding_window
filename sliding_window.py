@@ -64,6 +64,8 @@ def sliding_window_cupy( vals, window_size ):
         for i in range( 0, window_size ):
             cp.add( pinned_vals[i:i-window_size], sums, sums )
         print("Sums[:10] is {}".format(sums[:10]))
+        sums = cp.asnumpy(sums)
+        print("cupy: Sums[:10] is {}".format(sums[:10]))
 
 
 if __name__ == '__main__':
