@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
+import cupy as cp
 import random
 import time
 
@@ -18,6 +19,14 @@ def timeit(method):
             #      (method.__name__, (te - ts) * 1000)
         return result
     return timed
+
+
+def pinned_array(array):
+    mem = cp.cuda.alloc_pinned_memory(array.nbytes)
+    src = np.frombuffer(
+            mem, array.dtype, array.size).reshape(array.shape)
+    src[...] = array
+    return src
 
 @timeit
 def sliding_window( vals, window_size ):
@@ -44,6 +53,19 @@ def sliding_window_alt( vals, window_size ):
     print("alt: Sums[:10] is {}".format(sums[:10]))
 
 
+@timeit
+def sliding_window_cupy( vals, window_size ):
+    num_sums = len(vals) - window_size
+    sums = cp.zeros((num_sums,1))
+    pinned_vals = pinned_array( vals )
+
+    with cp.cuda.Device(0):
+        pinned_vals = cp.asarray(pinned_vals)
+        for i in range( 0, window_size ):
+            cp.add( pinned_vals[i:i-window_size], sums, sums )
+        print("Sums[:10] is {}".format(sums[:10]))
+
+
 if __name__ == '__main__':
     window_size = 4000
     num_vals = 1000000
@@ -51,5 +73,7 @@ if __name__ == '__main__':
     print("Vals[:10] is {}\n".format(vals[:10]))
     sliding_window( vals, window_size )
     print("\n")
-    sliding_window_alt( vals, window_size ) 
+    sliding_window_alt( vals, window_size )
+    print("\n")
+    sliding_window_cupy( vals, window_size ) 
     print("\n")
